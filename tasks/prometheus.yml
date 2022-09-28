@@ -1,0 +1,60 @@
+---
+
+- name: Check if Prometheus exists in /usr/local/bin
+  ansible.builtin.stat: "path=/usr/local/bin/prometheus"
+  register: check_path
+
+- name: Download Prometheus
+  ansible.builtin.get_url:
+    url: https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz
+    checksum: "sha256:{{ prometheus_checksum }}"
+    dest: /tmp
+  when: not check_path.stat.exists
+
+- name: Unarchive Prometheus
+  ansible.builtin.unarchive:
+    remote_src: yes
+    src: /tmp/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz
+    dest: /tmp
+  when: not check_path.stat.exists
+
+- name: Move Prometheus to /usr/local/bin
+  ansible.builtin.copy:
+    src: /tmp/prometheus-{{ prometheus_version }}.linux-amd64/prometheus
+    dest: /usr/local/bin/prometheus
+    remote_src: yes
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx # 0755
+  become: true
+  when: not check_path.stat.exists
+
+- name: Install unit file to systemd
+  ansible.builtin.template:
+    src: ./templates/prometheus/prometheus.service.j2
+    dest: /etc/systemd/system/prometheus.service
+    owner: root
+    group: root
+    mode: u=rw # 0600
+  become: true
+
+- name: Create config directory
+  ansible.builtin.file:
+    state: directory
+    path: /etc/prometheus
+    mode: u=rwx,g=rx,o=rx # 0755
+  become: true
+
+- name: Add prometheus config
+  ansible.builtin.template:
+    src: ./templates/prometheus/prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+  become: true
+
+- name: Configure systemd to use service
+  ansible.builtin.systemd:
+    daemon_reload: yes
+    enabled: yes
+    state: started
+    name: prometheus.service
+  become: true

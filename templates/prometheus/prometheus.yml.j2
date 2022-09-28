@@ -1,0 +1,46 @@
+global:
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: 'prometheus'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['localhost:9100']
+        labels:
+          group: 'Monitoring'
+
+  - job_name: 'MySQL cluster'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['db01.{{ domain }}:9100', 'db02.{{ domain }}:9100']
+        labels:
+          group: 'MySQL cluster'
+
+  - job_name: 'Reverse proxy'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['{{ domain }}:9100']
+        labels:
+          group: 'Reverse proxy'
+
+  - job_name: 'wordpress'
+    scrape_interval: 5s      
+    static_configs:
+      - targets: ['app.{{ domain }}:9100']
+        labels:
+          group: 'Wordpress'
+
+  - job_name: 'Gitlab'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['gitlab.{{ domain }}:9100', 'runner.{{ domain }}:9100']
+        labels:
+          group: 'GitLab'
+
+alerting:
+  alertmanagers:
+  - scheme: http
+    static_configs:
+    - targets:
+      - "localhost:9093"
+rule_files:
+  - /etc/prometheus/alert.rules

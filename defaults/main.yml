@@ -1,0 +1,7 @@
+---
+# defaults file for monitoring-role
+prometheus_version: 2.37.1
+prometheus_checksum: 753f66437597cf52ada98c2f459aa8c03745475c249c9f2b40ac7b3919131ba6
+
+alertmanager_version: 0.24.0
+alertmanager_checksum: 6fa982232ae7be5524f5b3cd4e90b7c6a75086368200c917644eaa3e806555dc

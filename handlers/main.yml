@@ -1,0 +1,33 @@
+---
+# handlers file for monitoring-role
+
+- name: Start grafana
+  systemd:
+    name: grafana-server
+    state: started
+  become: true
+
+- name: Enable grafana
+  systemd:
+    name: grafana-server
+    enabled: yes
+  become: true
+
+- name: Start and Enable Nginx
+  systemd:
+    name: nginx
+    state: started
+    enabled: yes
+  become: true
+
+- name: Restart nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+  become: true
+
+- name: Restart Prometheus
+  ansible.builtin.service:
+    name: prometheus
+    state: restarted
+  become: true

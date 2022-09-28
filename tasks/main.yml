@@ -1,0 +1,6 @@
+---
+# tasks file for monitoring-role
+
+- include_tasks: grafana.yml
+- include_tasks: prometheus.yml
+- include_tasks: alertmanager.yml
